@@ -1,0 +1,37 @@
+html {
+    font-family: "Roboto", sans-serif;
+}
+
+.ret-col {
+    font-weight: 600;
+    padding: 0 5px 0 5px;
+    border-radius: 5px;
+}
+
+.row {
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.al29 {
+    background-color: blue;
+}
+
+.al30 {
+    background-color: red;
+}
+
+.al35 {
+    background-color: purple;
+}
+
+.al38 {
+    background-color: green;
+}
+
+.al41 {
+    background-color: yellow;
+}

@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8">
+        <title>operatoria CCL</title>
+        <link href="styles/style.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+        <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    </head>
+
+    <body>
+        <main>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm">
+                        <h1 style="font-size: 18px;">Bonos Ley Local - Contado Inmediato</h1>
+                        <div id="bonos-contado-inmediato" style="height: 400px;" class="ag-theme-alpine-dark"></div>
+                    </div>
+                    <div class="col-sm">
+                        <h1 style="font-size: 18px;">Bonos Ley Local - 48hs</h1>
+                        <div id="bonos-48hs" style="height: 400px;" class="ag-theme-alpine-dark"></div>
+                    </div>
+                </div>
+                <div class="row" style="padding: 20px 20px 0 20px;">
+                    <div class="col-sm">
+                        <h1 style="font-size: 18px;">Cotización Dólar MEP y CABLE</h1>
+                        <div id="dolar-contado-inmediato" style="height: 300px;" class="ag-theme-alpine-dark"></div>
+                    </div>
+                </div>
+                <div class="row" style="padding: 0 20px 0 20px;">
+                    <div class="col-sm">
+                        <div id="dolar-48hs" style="height: 300px;" class="ag-theme-alpine-dark"></div>
+                    </div>
+                </div>
+                <div class="row" style="padding: 20px 20px 20px 20px;">
+                    <div class="col-sm">
+                        <div id="ccl-mep" style="height: 150px;" class="ag-theme-alpine-dark"></div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="card" style="background-color: #00C853;">
+                            <div class="card-body">
+                                <h5 class="card-title" id="ccl-acciones" style="font-size: 32px;"></h5>
+                                <h6 class="card-subtitle mb-2" id="date" style="color:#212121;"></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+        <script type="text/javascript">
+            'use strict';
+
+            function percentageFormatter(value){
+                if(!isNumber(value)){
+                    return value;
+                } else {
+                    return (value*100.0).toFixed(2).toString() + '%';
+                }
+            }
+
+            function cellRenderer(params, minRet, maxRet){
+
+                if (!isNumber(params.value)){
+                    return `<div>${params.value}</div>`;
+                }
+
+                const value = percentageFormatter(params.value);
+
+                if (params.value < 0.0) {
+                    const whiteWidth = 100.0*(1.0-(params.value/minRet));
+                    return `<div class="ret-col" style="background:linear-gradient(to right, white ${whiteWidth}%, #C62828 0%); text-aling: left; border: 2px solid #B71C1C; color: black;">` + value + '</div>';
+                } else {
+                    const greenWidth = 100.0*(params.value/maxRet);
+                    return `<div class="ret-col" style="background:linear-gradient(to right, #2E7D32 ${greenWidth}%, white 0%); text-align: right; border: 2px solid #1B5E20; color: black;">` + value + '</div>';
+                }
+            }
+
+            function currencyFormatter(value){
+                if (!isNumber(value)){
+                    return value;
+                } else {
+                return Intl.NumberFormat('es-AR', {style: 'currency', currency:'ARS'}).format(value);
+                }
+            }
+
+            function getBgColor(value){
+                if (value.startsWith('AL29')){
+                    return {backgroundColor: '#4527A0', color:'white'};
+                } else if (value.startsWith('AL30')){
+                    return {backgroundColor: '#283593', color:'white'};
+                } else if (value.startsWith('AL35')){
+                    return {backgroundColor: '#1565C0', color:'white'};
+                } else if (value.startsWith('AE38')){
+                    return {backgroundColor: '#0277BD', color:'white'};
+                } else if (value.startsWith('AL41')){
+                    return {backgroundColor: '#00838F', color:'white'};
+                }
+            }
+
+            function firstSpecie(params){
+                if (params.value === 'AL29'){
+                    return {backgroundColor: '#311B92'};
+                } else if (params.value === 'AL30'){
+                    return {backgroundColor: '#1A237E'};
+                } else if (params.value === 'AL35'){
+                    return {backgroundColor: '#0D47A1'};
+                } else if (params.value === 'AE38'){
+                    return {backgroundColor: '#01579B'};
+                } else if (params.value === 'AL41'){
+                    return {backgroundColor: '#006064'};
+                } else {
+                    return null;
+                }
+            }
+
+            function isNumber(value){
+                return typeof(value) === "number";
+            }
+
+            function getMinAndMax(rowData, col) {
+                var tempArray = rowData.filter(function(value){return isNumber(value[col])}).map(function(value){return value[col]})
+                const min = Math.min(...tempArray);
+                const max = Math.max(...tempArray);
+                return [min, max];
+            }
+
+            // Column defs
+
+            var columnDefsBondsContadoInmediato = [
+                { headerName: "Especie", field: "especie", cellStyle: firstSpecie},
+                { headerName: "Vencimiento", field: "vto" },
+                { headerName: "Precio", field: "price", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                { headerName: "%", field: "ret", cellRenderer: function(params) {return cellRenderer(params, minRetBondContadoInmediato, maxRetBondContadoInmediato)}},
+                { headerName: "Cierre Anterior", field: "previous", valueFormatter: function(params){return currencyFormatter(params.value)}}
+            ];
+
+            var columnDefsBonds48Hs = [
+                { headerName: "Especie", field: "especie", cellStyle: firstSpecie},
+                { headerName: "Vencimiento", field: "vto" },
+                { headerName: "Precio", field: "price", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                { headerName: "%", field: "ret", cellRenderer: function(params) {return cellRenderer(params, minRetBond48Hs, maxRetBond48Hs);}},
+                { headerName: "Cierre Anterior", field: "previous", valueFormatter: function(params){return currencyFormatter(params.value)}}
+            ];
+
+            var columnDefsDolarContadoInmediato = [
+                {headerName: "Contado Inmediato", field: "cdoInmediato"},
+                {headerName: "MEP T+0", field: "mep", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                {headerName: "CABLE T+0", field: "cable", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                {headerName: "Var diaria % MEP", field: "retMep", cellRenderer: function(params) {return cellRenderer(params, minRetDolarContadoInmediatoMep, maxRetDolarContadoInmediatoMep)}},
+                {headerName: "Var diaria % CABLE", field: "retCable", cellRenderer: function(params) {return cellRenderer(params, minRetDolarContadoInmediatoCable, maxRetDolarContadoInmediatoCable)}},
+                {headerName: "Spread", field: "spread", valueFormatter: function(params){return percentageFormatter(params.value)}}
+            ];
+
+            var columnDefsDolar48hs = [
+                {headerName: "48HS", field: "_48Hs"},
+                {headerName: "MEP T+2", field: "mep", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                {headerName: "CABLE T+2", field: "cable", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                {headerName: "Var diaria % MEP", field: "retMep", cellRenderer: function(params) {return cellRenderer(params, minRetDolar48HsMep, maxRetDolar48HsMep)}},
+                {headerName: "Var diaria % CABLE", field: "retCable", cellRenderer: function(params) {return cellRenderer(params, minRetDolar48HsCable, maxRetDolar48HsCable)}},
+                {headerName: "Spread", field: "spread", valueFormatter: function(params){return percentageFormatter(params.value)}}
+            ];
+
+            var columnDefsCclMep = [
+                {headerName: "Tipo", field: "type"},
+                {headerName: "CCL Prom.", field: "cclProm", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                {headerName: "MEP Prom.", field: "mepProm", valueFormatter: function(params){return currencyFormatter(params.value)}},
+                {headerName: "Spread", field: "spread", valueFormatter: function(params){return percentageFormatter(params.value)}}
+            ];
+
+            // specify the data
+
+            var rowDataBondContadoInmediato = [
+                { especie: "AL29", vto: "SPOT", price: 6200, ret: -0.0032, previous: 6220 },
+                { especie: "AL29D", vto: "SPOT", price: 47, ret: -0.0408, previous: 6220 },
+                { especie: "AL29C", vto: "SPOT", price: 44.51, ret: -0.0323, previous: 6220 },
+                { especie: "AL30", vto: "SPOT", price: 6014, ret: -0.0118, previous: 6220 },
+                { especie: "AL30D", vto: "SPOT", price: 45.30, ret: -0.0420, previous: 6220 },
+                { especie: "AL30C", vto: "SPOT", price: 42.81, ret: -0.0673, previous: 6220 },
+                { especie: "AL35", vto: "SPOT", price: 5280, ret: 0.0018, previous: 6220 },
+                { especie: "AL35D", vto: "SPOT", price: 40, ret: -0.0366, previous: 6220 },
+                { especie: "AL35C", vto: "SPOT", price: 0, ret: 0.00, previous: 6220 },
+                { especie: "AE38", vto: "SPOT", price: 5650, ret: -0.0173, previous: 6220 },
+                { especie: "AE38D", vto: "SPOT", price: 43, ret: -0.0341, previous: 6220 },
+                { especie: "AE38C", vto: "SPOT", price: 60, ret: 0.00, previous: 6220 },
+                { especie: "AL41", vto: "SPOT", price: 5025, ret: -0.0147, previous: 6220 },
+                { especie: "AL41D", vto: "SPOT", price: 39.25, ret: -0.0272, previous: 6220 },
+                { especie: "AL41C", vto: "SPOT", price: 0, ret: 0.00, previous: 6220 },
+            ];
+
+            var rowDataBond48Hs = [
+                { especie: "AL29", vto: "48HS", price: 6170, ret: -0.0064, previous: 6220 },
+                { especie: "AL29D", vto: "48HS", price: 47, ret: -0.0279, previous: 6220 },
+                { especie: "AL29C", vto: "48HS", price: 44.50, ret: -0.0273, previous: 6220 },
+                { especie: "AL30", vto: "48HS", price: 6000, ret: -0.0180, previous: 6220 },
+                { especie: "AL30D", vto: "48HS", price: 45.40, ret: -0.0360, previous: 6220 },
+                { especie: "AL30C", vto: "48HS", price: 42.59, ret: -0.0429, previous: 6220 },
+                { especie: "AL35", vto: "48HS", price: 5290, ret: 0.0093, previous: 6220 },
+                { especie: "AL35D", vto: "48HS", price: 39.80, ret: -0.0432, previous: 6220 },
+                { especie: "AL35C", vto: "48HS", price: 0, ret: 0.00, previous: 6220 },
+                { especie: "AE38", vto: "48HS", price: 5675, ret: -0.0121, previous: 6220 },
+                { especie: "AE38D", vto: "48HS", price: 42.85, ret: -0.0316, previous: 6220 },
+                { especie: "AE38C", vto: "48HS", price: 40.94, ret: 0.0134, previous: 6220 },
+                { especie: "AL41", vto: "48HS", price: 5089.50, ret: -0.0040, previous: 6220 },
+                { especie: "AL41D", vto: "48HS", price: 38.60, ret: -0.0349, previous: 6220 },
+                { especie: "AL41C", vto: "48HS", price: 0, ret: 0.00, previous: 6220 },
+            ];
+
+            var rowDataDolarContadoInmediato = [
+                {cdoInmediato: "AL29", mep: 131.91, cable: 139.29, retMep: 0.0392, retCable: 0.0302, spread: 0.059},
+                {cdoInmediato: "AL30", mep: 132.76, cable: 140.48, retMep: 0.0316, retCable: 0.0595, spread: 0.0582},
+                {cdoInmediato: "AL35", mep: 132.0, cable: "No hay", retMep: 0.04, retCable: "No hay", spread: "No hay"},
+                {cdoInmediato: "AE38", mep: 131.40, cable: "No hay", retMep: 0.0173, retCable: "No hay", spread: "No hay"},
+                {cdoInmediato: "AL41", mep: 128.03, cable: "No hay", retMep: 0.0129, retCable: "No hay", spread: "No hay"}
+            ]
+
+            var rowDataDolar48Hs = [
+                {_48Hs: "AL29", mep: 131.91, cable: 139.29, retMep: 0.0221, retCable: 0.0215, spread: 0.059},
+                {_48Hs: "AL30", mep: 132.76, cable: 140.48, retMep: 0.0188, retCable: 0.0260, spread: 0.0582},
+                {_48Hs: "AL35", mep: 132.0, cable: "No hay", retMep: 0.0354, retCable: "No hay", spread: "No hay"},
+                {_48Hs: "AE38", mep: 131.40, cable: "No hay", retMep: 0.0201, retCable: 0.0013, spread: "No hay"},
+                {_48Hs: "AL41", mep: 128.03, cable: "No hay", retMep: 0.0321, retCable: "No hay", spread: "No hay"}
+            ]
+
+            var rowDataCclMep = [
+                {type: "Contado Inmediato", cclProm: 139.89, mepProm: 131.22, spread:0.061},
+                {type: "48 Hs", cclProm: 139.38, mepProm: 132.13, spread:0.0549}
+            ];
+            
+            // Min and max values (percentage bar)
+
+            const [minRetBondContadoInmediato, maxRetBondContadoInmediato] = getMinAndMax(rowDataBondContadoInmediato, 'ret');
+            
+            const [minRetBond48Hs, maxRetBond48Hs] = getMinAndMax(rowDataBond48Hs, 'ret');
+          
+
+            const [minRetDolarContadoInmediatoMep, maxRetDolarContadoInmediatoMep] = getMinAndMax(rowDataDolarContadoInmediato, 'retMep');
+            const [minRetDolarContadoInmediatoCable, maxRetDolarContadoInmediatoCable] = getMinAndMax(rowDataDolarContadoInmediato, 'retCable');
+            
+            const [minRetDolar48HsMep, maxRetDolar48HsMep] = getMinAndMax(rowDataDolar48Hs, 'retMep');
+            const [minRetDolar48HsCable, maxRetDolar48HsCable] = getMinAndMax(rowDataDolar48Hs, 'retCable');
+
+            // let the grids know which columns and what data to use
+
+            var gridOptionsBondContadoInmediato = {
+                columnDefs: columnDefsBondsContadoInmediato,
+                getRowStyle: function(params){return getBgColor(params.data.especie)},
+                rowData: rowDataBondContadoInmediato,
+                defaultColDef: {width: 100}
+            };
+
+            var gridOptionsBond48Hs = {
+                columnDefs: columnDefsBonds48Hs,
+                getRowStyle: function(params){return getBgColor(params.data.especie)},
+                rowData: rowDataBond48Hs,
+                defaultColDef: {width: 100},
+            };
+
+            var gridOptionsDolarContadoInmediato = {
+                columnDefs: columnDefsDolarContadoInmediato,
+                getRowStyle: function(params){return getBgColor(params.data.cdoInmediato)},
+                rowData: rowDataDolarContadoInmediato,
+                defaultColDef: {width: 178}
+            };
+
+            var gridOptionsDolar48Hs = {
+                columnDefs: columnDefsDolar48hs,
+                getRowStyle: function(params){return getBgColor(params.data._48Hs)},
+                rowData: rowDataDolar48Hs,
+                defaultColDef: {width: 178}
+            };
+
+            var gridOptionsCclMep = {
+                columnDefs: columnDefsCclMep,
+                rowData: rowDataCclMep,
+                defaultColDef: {width: 128},
+            };
+
+            // Dolar
+            const cclAcciones = 137.34;
+            const date = Date.now();
+            const dateFormat = Intl.DateTimeFormat('es')
+
+            document.getElementById('ccl-acciones').innerHTML = 'CCL Acciones: ' + currencyFormatter(cclAcciones);
+            document.getElementById('date').innerHTML = dateFormat.format(date);
+
+            // setup the grid after the page has finished loading
+            document.addEventListener('DOMContentLoaded', function () {
+                var gridDiv = document.getElementById('bonos-contado-inmediato');
+                new agGrid.Grid(gridDiv, gridOptionsBondContadoInmediato);
+                gridDiv = document.getElementById('bonos-48hs');
+                new agGrid.Grid(gridDiv, gridOptionsBond48Hs);
+                gridDiv = document.getElementById('dolar-contado-inmediato');
+                new agGrid.Grid(gridDiv, gridOptionsDolarContadoInmediato);
+                gridDiv = document.getElementById('dolar-48hs');
+                new agGrid.Grid(gridDiv, gridOptionsDolar48Hs);
+                gridDiv = document.getElementById('ccl-mep');
+                new agGrid.Grid(gridDiv, gridOptionsCclMep);
+            });
+        </script>
+    </body>
+</html>
