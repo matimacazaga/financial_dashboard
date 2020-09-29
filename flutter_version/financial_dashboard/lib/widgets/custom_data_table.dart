@@ -12,7 +12,7 @@ class CustomDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: kBoxDecorationDataTable,
+      decoration: kBoxDecorationDataTableShadow,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: SingleChildScrollView(

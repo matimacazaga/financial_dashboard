@@ -11,8 +11,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Panel Financiero',
-      theme: ThemeData.dark().copyWith(
-        textTheme: ThemeData.dark().textTheme.apply(
+      theme: ThemeData.light().copyWith(
+        textTheme: ThemeData.light().textTheme.apply(
               fontFamily: 'Montserrat',
             ),
       ),

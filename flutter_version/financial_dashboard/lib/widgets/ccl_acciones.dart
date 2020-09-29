@@ -9,27 +9,30 @@ class CclAcciones extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      width: 555.0,
-      child: Row(
-        children: [
-          Icon(Icons.insert_chart),
-          SizedBox(
-            width: 10.0,
-          ),
-          Text('CCL Acciones', style: kColumnHeaderStyle),
-          SizedBox(
-            width: 20.0,
-          ),
-          Text(
-            '\$ $cclAcciones',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.only(top: 10.0),
+      child: Container(
+        alignment: Alignment.centerLeft,
+        width: 555.0,
+        child: Row(
+          children: [
+            Icon(Icons.insert_chart),
+            SizedBox(
+              width: 10.0,
             ),
-          )
-        ],
+            Text('CCL Acciones', style: kColumnHeaderStyle),
+            SizedBox(
+              width: 20.0,
+            ),
+            Text(
+              '\$ $cclAcciones',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
