@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Reporte de Riesgo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" rel="stylesheet">
+    <style media="only screen">
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        html {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0;
+            overflow: auto;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            padding: 1rem;
+            overflow: auto;
+        }
+
+        .ag-row .ag-cell {
+            display: flex;
+        }
+    </style>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+</head>
+
+<body>
+
+    <div class="container-flex" style="padding: 10px;">
+        <div class="row form-group">
+            <h1 id="title-table">Información Financiera correspondiente al último reporte</h1>
+            <h2 class="text-muted">Nota: "b" indica miles de millones.</h2>
+            <div id="bancos" style="height: 600px; width: 100%; min-width: 310px; margin: 1em auto;"
+                class="ag-theme-material"></div>
+        </div>
+        <div class="row">
+            <div id="limite-plazo-fijo"
+                style="height:400px; margin: 1em auto; width: 100%; min-width: 310px; max-width: 1200px;">
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-sm">
+                <div id="liquidez"
+                    style="height:400px;margin: 1em auto; width: 100%; min-width: 310px; max-width: 1200px;"></div>
+            </div>
+            <div class="col-sm">
+                <div id="expo-sector-publico"
+                    style="height:400px;margin: 1em auto; width: 100%; min-width: 310px; max-width: 600px;"></div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-sm">
+                <div id="concentracion-depositos"
+                    style="height:400px;margin: 1em auto; width: 100%; min-width: 310px; max-width: 600px;"></div>
+            </div>
+            <div class="col-sm">
+                <div id="cobertura-cartera"
+                    style="height:400px;margin: 1em auto; width: 100%; min-width: 310px; max-width: 600px;"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div id="cambio-plazo-fijo"
+                style="height:400px;margin: 1em auto; width: 100%; min-width: 310px; max-width: 1200px;">
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        function onFirstDataRendered(params) {
+            params.api.sizeColumnsToFit();
+        }
+
+        function currencyFormatter(value) {
+            if (!isNumber(value)) {
+                return value;
+            } else {
+                return Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
+            }
+        }
+
+        function isNumber(value) {
+            return typeof (value) === "number";
+        }
+
+        function percentageFormatter(value) {
+            if (!isNumber(value)) {
+                return value;
+            } else {
+                return (value * 100.0).toFixed(2).toString() + '%';
+            }
+        }
+
+        let date = Intl.DateTimeFormat('es').format(Date.now());
+
+        let lastReportDate = new Date('2019-12-31 00:00');
+
+        console.log(lastReportDate)
+
+        document.getElementById("title-table").innerHTML = `Información Financiera correspondiente al último reporte ${date}`;
+
+        let limitePlazoFijo = [
+            {
+                'name': 'BANCO DE LA NACION ARGENTINA',
+                'data': [[Date.UTC(2008, 12, 31), null], [Date.UTC(2009, 12, 31), 1745852997.2345848], [Date.UTC(2010, 12, 31), null], [Date.UTC(2011, 12, 31), 3393144315.5594172], [Date.UTC(2012, 12, 31), 4196211128.9590235], [Date.UTC(2013, 12, 31), 5907460354.874895], [Date.UTC(2014, 12, 31), 8210182053.386007], [Date.UTC(2015, 12, 31), 12396569500.849628], [Date.UTC(2016, 12, 31), 16919321919.59981], [Date.UTC(2017, 12, 31), 24259534119.181488], [Date.UTC(2018, 12, 31), 22733091594.306004], [Date.UTC(2019, 12, 31), 0.0]],
+            },
+            {
+                'name': 'BANCO DE LA PROVINCIA DE BUENOS AIRES',
+                'data': [[Date.UTC(2008, 12, 31), 0.0], [Date.UTC(2009, 12, 31), 233124480.6489488], [Date.UTC(2010, 12, 31), 328967830.88591886], [Date.UTC(2011, 12, 31), 433313606.87180156], [Date.UTC(2012, 12, 31), 562053210.4133682], [Date.UTC(2013, 12, 31), 375907451.5476104], [Date.UTC(2014, 12, 31), 565066427.3805686], [Date.UTC(2015, 12, 31), 691695375.0364056], [Date.UTC(2016, 12, 31), 1032210369.354002], [Date.UTC(2017, 12, 31), 2000943950.9806411], [Date.UTC(2018, 12, 31), 4324731467.516602], [Date.UTC(2019, 12, 31), 6187476610.0190115]],
+            },
+            {
+                'name': 'BANCO DE GALICIA Y BUENOS AIRES SAU',
+                'data': [[Date.UTC(2008, 12, 31), 305921786.5020968], [Date.UTC(2009, 12, 31), 324188168.20843834], [Date.UTC(2010, 12, 31), 413882607.6692279], [Date.UTC(2011, 12, 31), 593801359.7089262], [Date.UTC(2012, 12, 31), 745947122.166129], [Date.UTC(2013, 12, 31), 578591383.0868559], [Date.UTC(2014, 12, 31), 951000030.3658855], [Date.UTC(2015, 12, 31), 1406427082.9046848], [Date.UTC(2016, 12, 31), 1948825778.2202575], [Date.UTC(2017, 12, 31), 3626630940.6204743], [Date.UTC(2018, 12, 31), 4556962076.752807], [Date.UTC(2019, 12, 31), 11857086180.886782]],
+            },
+            {
+                'name': 'BANCO BBVA ARGENTINA SA',
+                'data': [[Date.UTC(2008, 12, 31), 535985127.9866368], [Date.UTC(2009, 12, 31), 790091515.3762809], [Date.UTC(2010, 12, 31), 891389056.9316014], [Date.UTC(2011, 12, 31), 1013059258.3124017], [Date.UTC(2012, 12, 31), 1297793458.6589684], [Date.UTC(2013, 12, 31), 1042758993.2012777], [Date.UTC(2014, 12, 31), 1583312624.7912893], [Date.UTC(2015, 12, 31), 2191207639.5409994], [Date.UTC(2016, 12, 31), 2658619655.8430495], [Date.UTC(2017, 12, 31), 4308175932.501825], [Date.UTC(2018, 12, 31), 6245882067.075556], [Date.UTC(2019, 12, 31), 14304165549.289446]],
+            },
+            {
+                'name': 'BANCO SANTANDER RIO SA',
+                'data': [[Date.UTC(2008, 12, 31), 527234867.029194], [Date.UTC(2009, 12, 31), 978668160.1731553], [Date.UTC(2010, 12, 31), 939437536.0608989], [Date.UTC(2011, 12, 31), 1246897754.6692152], [Date.UTC(2012, 12, 31), 1728372668.4296284], [Date.UTC(2013, 12, 31), 1857565926.6997824], [Date.UTC(2014, 12, 31), 2998824485.0279346], [Date.UTC(2015, 12, 31), 4196604378.7831607], [Date.UTC(2016, 12, 31), 5450897005.753705], [Date.UTC(2017, 12, 31), 6875535102.5912695], [Date.UTC(2018, 12, 31), 12253781612.57915], [Date.UTC(2019, 12, 31), 21388992511.405064]],
+            },
+        ];
+
+        let liquidez = [
+            {
+                'name': 'BANCO DE LA NACION ARGENTINA',
+                'data': [[Date.UTC(2008, 12, 31), null], [Date.UTC(2009, 12, 31), 0.4058273641021076], [Date.UTC(2010, 12, 31), null], [Date.UTC(2011, 12, 31), 0.4658974486812756], [Date.UTC(2012, 12, 31), 0.4713834668385006], [Date.UTC(2013, 12, 31), 0.5169532670787872], [Date.UTC(2014, 12, 31), 0.5929140986167846], [Date.UTC(2015, 12, 31), 0.578294622061089], [Date.UTC(2016, 12, 31), 0.613130170004547], [Date.UTC(2017, 12, 31), 0.44819264165943834], [Date.UTC(2018, 12, 31), 0.20406296960654424], [Date.UTC(2019, 12, 31), 0.26648676986706143]],
+            },
+            {
+                'name': 'BANCO DE LA PROVINCIA DE BUENOS AIRES',
+                'data': [[Date.UTC(2008, 12, 31), 0.18546739116741595], [Date.UTC(2009, 12, 31), 0.2174275671912894], [Date.UTC(2010, 12, 31), 0.30464668740905126], [Date.UTC(2011, 12, 31), 0.2081266163646665], [Date.UTC(2012, 12, 31), 0.21044378977236297], [Date.UTC(2013, 12, 31), 0.2180102636379923], [Date.UTC(2014, 12, 31), 0.26297524975963316], [Date.UTC(2015, 12, 31), 0.23542053413261937], [Date.UTC(2016, 12, 31), 0.3973940140355474], [Date.UTC(2017, 12, 31), 0.30241468063251215], [Date.UTC(2018, 12, 31), 0.5013269975681457], [Date.UTC(2019, 12, 31), 0.38039650128679914]],
+            },
+            {
+                'name': 'BANCO DE GALICIA Y BUENOS AIRES SAU',
+                'data': [[Date.UTC(2008, 12, 31), 0.2435927613280091], [Date.UTC(2009, 12, 31), 0.2672796294707592], [Date.UTC(2010, 12, 31), 0.30153587737349824], [Date.UTC(2011, 12, 31), 0.31951541449280213], [Date.UTC(2012, 12, 31), 0.23983754063910204], [Date.UTC(2013, 12, 31), 0.2625278595914974], [Date.UTC(2014, 12, 31), 0.35463356371703614], [Date.UTC(2015, 12, 31), 0.383913731900517], [Date.UTC(2016, 12, 31), 0.42118232186812066], [Date.UTC(2017, 12, 31), 0.36252292159156235], [Date.UTC(2018, 12, 31), 0.3303199254311609], [Date.UTC(2019, 12, 31), 0.4040446373218695]],
+            },
+            {
+                'name': 'BANCO BBVA ARGENTINA SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.3770702774268248], [Date.UTC(2009, 12, 31), 0.4153552318338348], [Date.UTC(2010, 12, 31), 0.3327343647446173], [Date.UTC(2011, 12, 31), 0.3758524404582842], [Date.UTC(2012, 12, 31), 0.3439886084469389], [Date.UTC(2013, 12, 31), 0.3489966051364304], [Date.UTC(2014, 12, 31), 0.42553002770453685], [Date.UTC(2015, 12, 31), 0.48769571685077767], [Date.UTC(2016, 12, 31), 0.48190969574015863], [Date.UTC(2017, 12, 31), 0.34845037544906055], [Date.UTC(2018, 12, 31), 0.36157491421549354], [Date.UTC(2019, 12, 31), 0.47308697396236926]],
+            },
+            {
+                'name': 'BANCO SANTANDER RIO SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.33427138169971415], [Date.UTC(2009, 12, 31), 0.4399584941509705], [Date.UTC(2010, 12, 31), 0.3219538027046611], [Date.UTC(2011, 12, 31), 0.35599802256664925], [Date.UTC(2012, 12, 31), 0.34031712415797716], [Date.UTC(2013, 12, 31), 0.3250901683380434], [Date.UTC(2014, 12, 31), 0.38769305167783896], [Date.UTC(2015, 12, 31), 0.41595715268572303], [Date.UTC(2016, 12, 31), 0.41708491461088426], [Date.UTC(2017, 12, 31), 0.35240036292338317], [Date.UTC(2018, 12, 31), 0.4930727168379715], [Date.UTC(2019, 12, 31), 0.38085140647070637]],
+            }
+        ];
+
+        let exposicioSectorPublico = [
+            {
+                'name': 'BANCO DE LA NACION ARGENTINA',
+                'data': [[Date.UTC(2008, 12, 31), null], [Date.UTC(2009, 12, 31), 0.4058273641021076], [Date.UTC(2010, 12, 31), null], [Date.UTC(2011, 12, 31), 0.4658974486812756], [Date.UTC(2012, 12, 31), 0.4713834668385006], [Date.UTC(2013, 12, 31), 0.5169532670787872], [Date.UTC(2014, 12, 31), 0.5929140986167846], [Date.UTC(2015, 12, 31), 0.578294622061089], [Date.UTC(2016, 12, 31), 0.613130170004547], [Date.UTC(2017, 12, 31), 0.44819264165943834], [Date.UTC(2018, 12, 31), 0.20406296960654424], [Date.UTC(2019, 12, 31), 0.26648676986706143]],
+            },
+            {
+                'name': 'BANCO DE LA PROVINCIA DE BUENOS AIRES',
+                'data': [[Date.UTC(2008, 12, 31), 0.18546739116741595], [Date.UTC(2009, 12, 31), 0.2174275671912894], [Date.UTC(2010, 12, 31), 0.30464668740905126], [Date.UTC(2011, 12, 31), 0.2081266163646665], [Date.UTC(2012, 12, 31), 0.21044378977236297], [Date.UTC(2013, 12, 31), 0.2180102636379923], [Date.UTC(2014, 12, 31), 0.26297524975963316], [Date.UTC(2015, 12, 31), 0.23542053413261937], [Date.UTC(2016, 12, 31), 0.3973940140355474], [Date.UTC(2017, 12, 31), 0.30241468063251215], [Date.UTC(2018, 12, 31), 0.5013269975681457], [Date.UTC(2019, 12, 31), 0.38039650128679914]],
+            },
+            {
+                'name': 'BANCO DE GALICIA Y BUENOS AIRES SAU',
+                'data': [[Date.UTC(2008, 12, 31), 0.2435927613280091], [Date.UTC(2009, 12, 31), 0.2672796294707592], [Date.UTC(2010, 12, 31), 0.30153587737349824], [Date.UTC(2011, 12, 31), 0.31951541449280213], [Date.UTC(2012, 12, 31), 0.23983754063910204], [Date.UTC(2013, 12, 31), 0.2625278595914974], [Date.UTC(2014, 12, 31), 0.35463356371703614], [Date.UTC(2015, 12, 31), 0.383913731900517], [Date.UTC(2016, 12, 31), 0.42118232186812066], [Date.UTC(2017, 12, 31), 0.36252292159156235], [Date.UTC(2018, 12, 31), 0.3303199254311609], [Date.UTC(2019, 12, 31), 0.4040446373218695]],
+            },
+            {
+                'name': 'BANCO BBVA ARGENTINA SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.3770702774268248], [Date.UTC(2009, 12, 31), 0.4153552318338348], [Date.UTC(2010, 12, 31), 0.3327343647446173], [Date.UTC(2011, 12, 31), 0.3758524404582842], [Date.UTC(2012, 12, 31), 0.3439886084469389], [Date.UTC(2013, 12, 31), 0.3489966051364304], [Date.UTC(2014, 12, 31), 0.42553002770453685], [Date.UTC(2015, 12, 31), 0.48769571685077767], [Date.UTC(2016, 12, 31), 0.48190969574015863], [Date.UTC(2017, 12, 31), 0.34845037544906055], [Date.UTC(2018, 12, 31), 0.36157491421549354], [Date.UTC(2019, 12, 31), 0.47308697396236926]],
+            },
+            {
+                'name': 'BANCO SANTANDER RIO SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.33427138169971415], [Date.UTC(2009, 12, 31), 0.4399584941509705], [Date.UTC(2010, 12, 31), 0.3219538027046611], [Date.UTC(2011, 12, 31), 0.35599802256664925], [Date.UTC(2012, 12, 31), 0.34031712415797716], [Date.UTC(2013, 12, 31), 0.3250901683380434], [Date.UTC(2014, 12, 31), 0.38769305167783896], [Date.UTC(2015, 12, 31), 0.41595715268572303], [Date.UTC(2016, 12, 31), 0.41708491461088426], [Date.UTC(2017, 12, 31), 0.35240036292338317], [Date.UTC(2018, 12, 31), 0.4930727168379715], [Date.UTC(2019, 12, 31), 0.38085140647070637]],
+            }
+        ];
+
+        let concentracionDepositos = [
+            {
+                'name': 'BANCO DE LA NACION ARGENTINA',
+                'data': [[Date.UTC(2008, 12, 31), null], [Date.UTC(2009, 12, 31), 0.4058273641021076], [Date.UTC(2010, 12, 31), null], [Date.UTC(2011, 12, 31), 0.4658974486812756], [Date.UTC(2012, 12, 31), 0.4713834668385006], [Date.UTC(2013, 12, 31), 0.5169532670787872], [Date.UTC(2014, 12, 31), 0.5929140986167846], [Date.UTC(2015, 12, 31), 0.578294622061089], [Date.UTC(2016, 12, 31), 0.613130170004547], [Date.UTC(2017, 12, 31), 0.44819264165943834], [Date.UTC(2018, 12, 31), 0.20406296960654424], [Date.UTC(2019, 12, 31), 0.26648676986706143]],
+            },
+            {
+                'name': 'BANCO DE LA PROVINCIA DE BUENOS AIRES',
+                'data': [[Date.UTC(2008, 12, 31), 0.18546739116741595], [Date.UTC(2009, 12, 31), 0.2174275671912894], [Date.UTC(2010, 12, 31), 0.30464668740905126], [Date.UTC(2011, 12, 31), 0.2081266163646665], [Date.UTC(2012, 12, 31), 0.21044378977236297], [Date.UTC(2013, 12, 31), 0.2180102636379923], [Date.UTC(2014, 12, 31), 0.26297524975963316], [Date.UTC(2015, 12, 31), 0.23542053413261937], [Date.UTC(2016, 12, 31), 0.3973940140355474], [Date.UTC(2017, 12, 31), 0.30241468063251215], [Date.UTC(2018, 12, 31), 0.5013269975681457], [Date.UTC(2019, 12, 31), 0.38039650128679914]],
+            },
+            {
+                'name': 'BANCO DE GALICIA Y BUENOS AIRES SAU',
+                'data': [[Date.UTC(2008, 12, 31), 0.2435927613280091], [Date.UTC(2009, 12, 31), 0.2672796294707592], [Date.UTC(2010, 12, 31), 0.30153587737349824], [Date.UTC(2011, 12, 31), 0.31951541449280213], [Date.UTC(2012, 12, 31), 0.23983754063910204], [Date.UTC(2013, 12, 31), 0.2625278595914974], [Date.UTC(2014, 12, 31), 0.35463356371703614], [Date.UTC(2015, 12, 31), 0.383913731900517], [Date.UTC(2016, 12, 31), 0.42118232186812066], [Date.UTC(2017, 12, 31), 0.36252292159156235], [Date.UTC(2018, 12, 31), 0.3303199254311609], [Date.UTC(2019, 12, 31), 0.4040446373218695]],
+            },
+            {
+                'name': 'BANCO BBVA ARGENTINA SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.3770702774268248], [Date.UTC(2009, 12, 31), 0.4153552318338348], [Date.UTC(2010, 12, 31), 0.3327343647446173], [Date.UTC(2011, 12, 31), 0.3758524404582842], [Date.UTC(2012, 12, 31), 0.3439886084469389], [Date.UTC(2013, 12, 31), 0.3489966051364304], [Date.UTC(2014, 12, 31), 0.42553002770453685], [Date.UTC(2015, 12, 31), 0.48769571685077767], [Date.UTC(2016, 12, 31), 0.48190969574015863], [Date.UTC(2017, 12, 31), 0.34845037544906055], [Date.UTC(2018, 12, 31), 0.36157491421549354], [Date.UTC(2019, 12, 31), 0.47308697396236926]],
+            },
+            {
+                'name': 'BANCO SANTANDER RIO SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.33427138169971415], [Date.UTC(2009, 12, 31), 0.4399584941509705], [Date.UTC(2010, 12, 31), 0.3219538027046611], [Date.UTC(2011, 12, 31), 0.35599802256664925], [Date.UTC(2012, 12, 31), 0.34031712415797716], [Date.UTC(2013, 12, 31), 0.3250901683380434], [Date.UTC(2014, 12, 31), 0.38769305167783896], [Date.UTC(2015, 12, 31), 0.41595715268572303], [Date.UTC(2016, 12, 31), 0.41708491461088426], [Date.UTC(2017, 12, 31), 0.35240036292338317], [Date.UTC(2018, 12, 31), 0.4930727168379715], [Date.UTC(2019, 12, 31), 0.38085140647070637]],
+            }
+        ];
+
+        let coberturaCartera = [
+            {
+                'name': 'BANCO DE LA NACION ARGENTINA',
+                'data': [[Date.UTC(2008, 12, 31), null], [Date.UTC(2009, 12, 31), 0.4058273641021076], [Date.UTC(2010, 12, 31), null], [Date.UTC(2011, 12, 31), 0.4658974486812756], [Date.UTC(2012, 12, 31), 0.4713834668385006], [Date.UTC(2013, 12, 31), 0.5169532670787872], [Date.UTC(2014, 12, 31), 0.5929140986167846], [Date.UTC(2015, 12, 31), 0.578294622061089], [Date.UTC(2016, 12, 31), 0.613130170004547], [Date.UTC(2017, 12, 31), 0.44819264165943834], [Date.UTC(2018, 12, 31), 0.20406296960654424], [Date.UTC(2019, 12, 31), 0.26648676986706143]],
+            },
+            {
+                'name': 'BANCO DE LA PROVINCIA DE BUENOS AIRES',
+                'data': [[Date.UTC(2008, 12, 31), 0.18546739116741595], [Date.UTC(2009, 12, 31), 0.2174275671912894], [Date.UTC(2010, 12, 31), 0.30464668740905126], [Date.UTC(2011, 12, 31), 0.2081266163646665], [Date.UTC(2012, 12, 31), 0.21044378977236297], [Date.UTC(2013, 12, 31), 0.2180102636379923], [Date.UTC(2014, 12, 31), 0.26297524975963316], [Date.UTC(2015, 12, 31), 0.23542053413261937], [Date.UTC(2016, 12, 31), 0.3973940140355474], [Date.UTC(2017, 12, 31), 0.30241468063251215], [Date.UTC(2018, 12, 31), 0.5013269975681457], [Date.UTC(2019, 12, 31), 0.38039650128679914]],
+            },
+            {
+                'name': 'BANCO DE GALICIA Y BUENOS AIRES SAU',
+                'data': [[Date.UTC(2008, 12, 31), 0.2435927613280091], [Date.UTC(2009, 12, 31), 0.2672796294707592], [Date.UTC(2010, 12, 31), 0.30153587737349824], [Date.UTC(2011, 12, 31), 0.31951541449280213], [Date.UTC(2012, 12, 31), 0.23983754063910204], [Date.UTC(2013, 12, 31), 0.2625278595914974], [Date.UTC(2014, 12, 31), 0.35463356371703614], [Date.UTC(2015, 12, 31), 0.383913731900517], [Date.UTC(2016, 12, 31), 0.42118232186812066], [Date.UTC(2017, 12, 31), 0.36252292159156235], [Date.UTC(2018, 12, 31), 0.3303199254311609], [Date.UTC(2019, 12, 31), 0.4040446373218695]],
+            },
+            {
+                'name': 'BANCO BBVA ARGENTINA SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.3770702774268248], [Date.UTC(2009, 12, 31), 0.4153552318338348], [Date.UTC(2010, 12, 31), 0.3327343647446173], [Date.UTC(2011, 12, 31), 0.3758524404582842], [Date.UTC(2012, 12, 31), 0.3439886084469389], [Date.UTC(2013, 12, 31), 0.3489966051364304], [Date.UTC(2014, 12, 31), 0.42553002770453685], [Date.UTC(2015, 12, 31), 0.48769571685077767], [Date.UTC(2016, 12, 31), 0.48190969574015863], [Date.UTC(2017, 12, 31), 0.34845037544906055], [Date.UTC(2018, 12, 31), 0.36157491421549354], [Date.UTC(2019, 12, 31), 0.47308697396236926]],
+            },
+            {
+                'name': 'BANCO SANTANDER RIO SA',
+                'data': [[Date.UTC(2008, 12, 31), 0.33427138169971415], [Date.UTC(2009, 12, 31), 0.4399584941509705], [Date.UTC(2010, 12, 31), 0.3219538027046611], [Date.UTC(2011, 12, 31), 0.35599802256664925], [Date.UTC(2012, 12, 31), 0.34031712415797716], [Date.UTC(2013, 12, 31), 0.3250901683380434], [Date.UTC(2014, 12, 31), 0.38769305167783896], [Date.UTC(2015, 12, 31), 0.41595715268572303], [Date.UTC(2016, 12, 31), 0.41708491461088426], [Date.UTC(2017, 12, 31), 0.35240036292338317], [Date.UTC(2018, 12, 31), 0.4930727168379715], [Date.UTC(2019, 12, 31), 0.38085140647070637]],
+            }
+        ];
+
+        let cambioLimitePlazoFijo = [
+            {
+                'name': 'BANCO DE GALICIA Y BUENOS AIRES SAU',
+                'data': [1.6019716603250482],
+            },
+            {
+                'name': 'BANCO BBVA ARGENTINA SA',
+                'data': [1.2901754140847772],
+            },
+            {
+                'name': 'BANCO SANTANDER RIO SA',
+                'data': [0.7455013633871308],
+            },
+            {
+                'name': 'BANCO DE LA PROVINCIA DE BUENOS AIRES',
+                'data': [0.4307192611827195],
+            },
+            {
+                'name': 'BANCO DE LA NACION ARGENTINA',
+                'data': [-1.0],
+            },
+        ];
+
+        let columnDefsTablaBancos = [
+            { headerName: "Banco", field: "bank", cellStyle: { fontSize: "12px", whiteSpace: "normal", }, valueFormatter: function (params) { return params.value.replaceAll('_', ' ').toUpperCase() } },// cellStyle: firstSpecie},
+            { headerName: "Límite Plazo Fijo", field: "limite_pf", valueFormatter: function (params) { return currencyFormatter(params.value) }, },
+            { headerName: "Liquidez", field: "liquidez", valueFormatter: function (params) { return percentageFormatter(params.value) }, },
+            { headerName: "Exposición Sector Público", field: "exposicion_sector_publico", valueFormatter: function (params) { return percentageFormatter(params.value) } },
+            { headerName: "Cobertura de Cartera", field: "cobertura_de_cartera", valueFormatter: function (params) { return percentageFormatter(params.value) } },
+            { headerName: "Concentración Depósitos 100 ppales Acreedores", field: "concentracion_depositos_100_pa", valueFormatter: function (params) { return percentageFormatter(params.value) } },
+            { headerName: "Grupo", field: "grupo", },
+        ];
+
+        let defaultColDef = {
+            resizable: true,
+            sortable: true,
+            wrapText: true,
+            autoHeight: true,
+        };
+
+        let tablaBancos = [
+            { "grupo": "IIIA", "liquidez": 0.4040446373218695, "exposicion_sector_publico": 0.18465451258211055, "cobertura_de_cartera": 0.9418125794279805, "concentracion_depositos_100_pa": 0.2017, "limite_pf": 11857086.18088678, "bank": "banco_de_galicia_y_buenos_aires_sau" },
+            { "grupo": "IVAAA", "liquidez": 0.26648676986706143, "exposicion_sector_publico": 0.5201003387733707, "cobertura_de_cartera": 0.8178097530740631, "concentracion_depositos_100_pa": 0.6665, "limite_pf": 0.0, "bank": "banco_de_la_nacion_argentina" },
+            { "grupo": "IIIA", "liquidez": 0.38039650128679914, "exposicion_sector_publico": 0.312826626935759, "cobertura_de_cartera": 0.735508440853543, "concentracion_depositos_100_pa": 0.32109999999999994, "limite_pf": 6187476.610019011, "bank": "banco_de_la_provincia_de_buenos_aires" },
+            { "grupo": "IIAAA", "liquidez": 0.5562033865494751, "exposicion_sector_publico": 0.24544990189117755, "cobertura_de_cartera": 0.9455321001281802, "concentracion_depositos_100_pa": 0.2712, "limite_pf": 11641858.24895801, "bank": "industrial_and_commercial_bank_of_china" },
+            { "grupo": "IAAA", "liquidez": 0.8504328759323043, "exposicion_sector_publico": 0.643654751517338, "cobertura_de_cartera": 0.934117222071706, "concentracion_depositos_100_pa": 0.7755, "limite_pf": 10266450.602417462, "bank": "citibank_na" },
+            { "grupo": "IIA", "liquidez": 0.47308697396236926, "exposicion_sector_publico": 2.4609291433157726e-06, "cobertura_de_cartera": 1.0410578991150239, "concentracion_depositos_100_pa": 0.13939999999999997, "limite_pf": 14304165.549289446, "bank": "banco_bbva_argentina_sa" },
+            { "grupo": "IIIA", "liquidez": 0.26462903118332354, "exposicion_sector_publico": 0.30432846872417524, "cobertura_de_cartera": 1.2251145674496637, "concentracion_depositos_100_pa": 0.4063, "limite_pf": 1293932.3817271632, "bank": "banco_de_la_provincia_de_cordoba_sa" },
+            { "grupo": "IIIA", "liquidez": 0.2453519723732487, "exposicion_sector_publico": 0.10341134519874808, "cobertura_de_cartera": 0.7351099990444534, "concentracion_depositos_100_pa": 0.3144, "limite_pf": 1776517.8628213382, "bank": "banco_supervielle_sa" },
+            { "grupo": "IIIA", "liquidez": 0.3060461760058388, "exposicion_sector_publico": 0.3090550056411767, "cobertura_de_cartera": 0.5930192299212363, "concentracion_depositos_100_pa": 0.3811, "limite_pf": 2853685.6029052795, "bank": "banco_de_la_ciudad_de_buenos_aires" },
+            { "grupo": "IIIAAA", "liquidez": 0.31295620853502554, "exposicion_sector_publico": 0.3377553033250153, "cobertura_de_cartera": 2.1132112398579466, "concentracion_depositos_100_pa": 0.28359999999999996, "limite_pf": 6962465.045713238, "bank": "banco_patagonia_sa" },
+            { "grupo": "IIIA", "liquidez": 0.40355953366182246, "exposicion_sector_publico": 0.19643938477797818, "cobertura_de_cartera": 0.5270731664160543, "concentracion_depositos_100_pa": 0.31010000000000004, "limite_pf": 1128438.8749973746, "bank": "banco_hipotecario_sa" },
+            { "grupo": null, "liquidez": 0.6688340462546633, "exposicion_sector_publico": 0.5667081616622324, "cobertura_de_cartera": 0.7384529309269946, "concentracion_depositos_100_pa": 0.7582, "limite_pf": null, "bank": "banco_de_san_juan_sa" },
+            { "grupo": null, "liquidez": 0.2399660011712646, "exposicion_sector_publico": 0.3880429823897843, "cobertura_de_cartera": 0.8787609400628545, "concentracion_depositos_100_pa": 0.33540000000000003, "limite_pf": null, "bank": "banco_municipal_de_rosario" },
+            { "grupo": "IIAAA", "liquidez": 0.38085140647070637, "exposicion_sector_publico": 0.11438452571923254, "cobertura_de_cartera": 0.9534646147204664, "concentracion_depositos_100_pa": 0.1765000000000001, "limite_pf": 21388992.511405062, "bank": "banco_santander_rio_sa" },
+            { "grupo": "IIIA", "liquidez": 0.4049848554143051, "exposicion_sector_publico": 0.21922772913838212, "cobertura_de_cartera": 0.6527563458707651, "concentracion_depositos_100_pa": 0.43990000000000007, "limite_pf": 456702.6090326946, "bank": "banco_del_chubut_sa" },
+            { "grupo": null, "liquidez": 0.4495317176265614, "exposicion_sector_publico": 0.377632229291883, "cobertura_de_cartera": 0.7881815973654034, "concentracion_depositos_100_pa": 0.4942, "limite_pf": null, "bank": "banco_de_santa_cruz_sa" },
+            { "grupo": "IIIAAA", "liquidez": 0.13287352187062923, "exposicion_sector_publico": 0.6298001305238105, "cobertura_de_cartera": 1.3537097282812804, "concentracion_depositos_100_pa": 0.44530000000000003, "limite_pf": 924717.8314053259, "bank": "banco_de_la_pampa_sociedad_de_economia_m" },
+            { "grupo": null, "liquidez": 0.5557264963024106, "exposicion_sector_publico": 0.2650534274756137, "cobertura_de_cartera": 0.6457507900724211, "concentracion_depositos_100_pa": 0.4185, "limite_pf": null, "bank": "banco_de_corrientes_sa" },
+            { "grupo": "IIIAA", "liquidez": 0.29624356814878056, "exposicion_sector_publico": 0.21374374491472403, "cobertura_de_cartera": 0.9295251436131268, "concentracion_depositos_100_pa": 0.4122, "limite_pf": 934003.9201457627, "bank": "banco_provincia_del_neuquen_sociedad_ano" },
+            { "grupo": null, "liquidez": 0.4969545306304243, "exposicion_sector_publico": 0.0, "cobertura_de_cartera": 1.4852941176470589, "concentracion_depositos_100_pa": 0.12120000000000009, "limite_pf": null, "bank": "brubank_sau" },
+            { "grupo": "IIIA", "liquidez": 0.636319538736181, "exposicion_sector_publico": 0.4815962452825948, "cobertura_de_cartera": 0.5429506295559974, "concentracion_depositos_100_pa": 0.0, "limite_pf": 35590.36090237772, "bank": "banco_interfinanzas_sa" },
+            { "grupo": "IIAAA", "liquidez": 0.5422890702983445, "exposicion_sector_publico": 0.27085659034231363, "cobertura_de_cartera": 0.8385587844656075, "concentracion_depositos_100_pa": 0.47109999999999996, "limite_pf": 7383219.915034563, "bank": "hsbc_bank_argentina_sa" },
+        ];
+
+        let gridOptionsTablaBancos = {
+            columnDefs: columnDefsTablaBancos,
+            rowData: tablaBancos,
+            defaultColDef: defaultColDef,
+            onFirstDataRendered: onFirstDataRendered,
+            pagination: true,
+            paginationAutoPageSize: true,
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            let gridDiv = document.getElementById('bancos');
+            new agGrid.Grid(gridDiv, gridOptionsTablaBancos);
+
+            let myChart = Highcharts.chart('limite-plazo-fijo', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Evolución Límite Plazo Fijo'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    title: {
+                        text: 'Fecha'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Límite Plazo Fijo'
+                    }
+                },
+                series: limitePlazoFijo,
+            });
+
+            myChart = Highcharts.chart('liquidez', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Liquidez'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    title: {
+                        text: 'Fecha'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Evolución de la Liquidez'
+                    }
+                },
+                series: liquidez,
+            });
+
+            myChart = Highcharts.chart('expo-sector-publico', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Evolución de la Exposición Sector Público'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    title: {
+                        text: 'Fecha'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Exp. Sector Público'
+                    }
+                },
+                series: exposicioSectorPublico,
+            });
+
+            myChart = Highcharts.chart('concentracion-depositos', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Evolución de la Concentración de Depósitos en los 100 Principales acreedores'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    title: {
+                        text: 'Fecha'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Conc. Depósitos 100 ppales. acreed.'
+                    }
+                },
+                series: concentracionDepositos,
+            });
+
+            myChart = Highcharts.chart('cobertura-cartera', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Evolución de la Cobertura de Cartera'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    title: {
+                        text: 'Fecha'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Cobertura de Cartera'
+                    }
+                },
+                series: coberturaCartera,
+            });
+
+            myChart = Highcharts.chart('cambio-plazo-fijo', {
+                chart: {
+                    type: 'bar'
+                },
+                title: {
+                    text: `Cambio porcentual del Límite de Plazo Fijo al último reporte ${Intl.DateTimeFormat('es').format(lastReportDate)}`
+                },
+                xAxis: {
+                    type: 'datetime',
+                    categories: [Intl.DateTimeFormat('es').format(lastReportDate)],
+                },
+                yAxis: {
+                    title: {
+                        text: 'Cambio Plazo Fijo (%)'
+                    }
+                },
+                series: cambioLimitePlazoFijo,
+            });
+        });
+    </script>
+</body>
+
+</html>
